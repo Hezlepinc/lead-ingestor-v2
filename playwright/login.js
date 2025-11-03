@@ -63,6 +63,24 @@ function findAuthFrame(page, timeoutMs = 15000) {
     try { await page.waitForLoadState("networkidle", { timeout: 15000 }); } catch {}
 
     // Heuristics: detect login form
+    const openLoginSelectors = [
+        'button:has-text("Sign in")',
+        'button:has-text("Log in")',
+        'button:has-text("Continue")',
+        'a:has-text("Sign in")',
+        'a:has-text("Log in")',
+        'a[href*="login" i]'
+    ];
+    // Try to reveal hidden forms
+    for (const sel of openLoginSelectors) {
+        const btn = await page.$(sel);
+        if (btn) {
+            try { await btn.click({ timeout: 2000 }); } catch {}
+            try { await page.waitForLoadState("networkidle", { timeout: 5000 }); } catch {}
+            break;
+        }
+    }
+
     const loginSelectors = [
         'input[type="email"]',
         'input[name="email"]',
