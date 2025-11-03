@@ -35,8 +35,7 @@ services:
         value: /opt/render/project/.cache/ms-playwright
       - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: "1"
-    envVarGroups:
-      - lead-ingestor-centralfl
+    
     disk:
       name: lead-ingestor-centralfl-disk
       mountPath: /var/data
@@ -78,8 +77,7 @@ services:
         value: /opt/render/project/.cache/ms-playwright
       - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: "1"
-    envVarGroups:
-      - lead-ingestor-jax
+    
     disk:
       name: lead-ingestor-jax-disk
       mountPath: /var/data
@@ -121,8 +119,7 @@ services:
         value: /opt/render/project/.cache/ms-playwright
       - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: "1"
-    envVarGroups:
-      - lead-ingestor-ftmyers
+    
     disk:
       name: lead-ingestor-ftmyers-disk
       mountPath: /var/data
@@ -164,8 +161,7 @@ services:
         value: /opt/render/project/.cache/ms-playwright
       - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: "1"
-    envVarGroups:
-      - lead-ingestor-austin
+    
     disk:
       name: lead-ingestor-austin-disk
       mountPath: /var/data
@@ -207,8 +203,7 @@ services:
         value: /opt/render/project/.cache/ms-playwright
       - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: "1"
-    envVarGroups:
-      - lead-ingestor-dallas
+    
     disk:
       name: lead-ingestor-dallas-disk
       mountPath: /var/data
