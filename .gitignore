@@ -1,0 +1,13 @@
+# env files
+.env
+lead-ingestor.env
+
+# runtime data
+data/*.txt
+cookies/*.json
+
+# logs and cache
+npm-debug.log*
+.npmrc
+
+

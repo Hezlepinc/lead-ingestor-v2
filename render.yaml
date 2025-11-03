@@ -11,6 +11,12 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PP_USERNAME
+        fromSecret: pp_username_centralfl
+      - key: PP_PASSWORD
+        fromSecret: pp_password_centralfl
+      - key: PP_MFA_CODE
+        fromSecret: pp_mfa_centralfl
       - key: DEALER_REGION
         value: Central FL
       - key: DEALER_ID
@@ -52,6 +58,12 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PP_USERNAME
+        fromSecret: pp_username_jax
+      - key: PP_PASSWORD
+        fromSecret: pp_password_jax
+      - key: PP_MFA_CODE
+        fromSecret: pp_mfa_jax
       - key: DEALER_REGION
         value: Jacksonville FL
       - key: DEALER_ID
@@ -93,6 +105,12 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PP_USERNAME
+        fromSecret: pp_username_ftmyers
+      - key: PP_PASSWORD
+        fromSecret: pp_password_ftmyers
+      - key: PP_MFA_CODE
+        fromSecret: pp_mfa_ftmyers
       - key: DEALER_REGION
         value: Ft Myers FL
       - key: DEALER_ID
@@ -134,6 +152,12 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PP_USERNAME
+        fromSecret: pp_username_austin
+      - key: PP_PASSWORD
+        fromSecret: pp_password_austin
+      - key: PP_MFA_CODE
+        fromSecret: pp_mfa_austin
       - key: DEALER_REGION
         value: Austin TX
       - key: DEALER_ID
@@ -175,6 +199,12 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PP_USERNAME
+        fromSecret: pp_username_dallas
+      - key: PP_PASSWORD
+        fromSecret: pp_password_dallas
+      - key: PP_MFA_CODE
+        fromSecret: pp_mfa_dallas
       - key: DEALER_REGION
         value: Dallas TX
       - key: DEALER_ID
