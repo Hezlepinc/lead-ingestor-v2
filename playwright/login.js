@@ -17,7 +17,7 @@ async function fillIfPresent(scope, selector, value) {
     return true;
 }
 
-function findAuthFrame(page, timeoutMs = 15000) {
+function findAuthFrame(page, timeoutMs = 20000) {
     return new Promise((resolve) => {
         const start = Date.now();
         const tryFind = async () => {
@@ -25,7 +25,7 @@ function findAuthFrame(page, timeoutMs = 15000) {
             const frames = page.frames();
             for (const f of frames) {
                 const u = f.url() || "";
-                if (/auth0|login|authorize|u\/login|identity|auth\//i.test(u)) {
+                if (/auth0|login|authorize|u\/login|identity|auth\//i.test(u) || /microsoftonline|live\.com|okta|pingidentity|onelogin|adfs|saml|oauth2/i.test(u)) {
                     return resolve(f);
                 }
             }
@@ -61,6 +61,12 @@ function findAuthFrame(page, timeoutMs = 15000) {
     await page.goto(appUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
     // Allow redirects to auth provider
     try { await page.waitForLoadState("networkidle", { timeout: 15000 }); } catch {}
+
+    // Optional explicit selectors via env (SSO-specific)
+    const OV_USER = process.env.PP_LOGIN_USERNAME_SELECTOR || "";
+    const OV_NEXT = process.env.PP_LOGIN_NEXT_SELECTOR || "";
+    const OV_PASS = process.env.PP_LOGIN_PASSWORD_SELECTOR || "";
+    const OV_SUBMIT = process.env.PP_LOGIN_SUBMIT_SELECTOR || "";
 
     // Heuristics: detect login form
     const openLoginSelectors = [
@@ -120,8 +126,14 @@ function findAuthFrame(page, timeoutMs = 15000) {
 
     if (needsLogin) {
         console.log(`[${region}] ✏️  Filling credentials`);
-        // Username
+        // Username (env override first)
         let userFilled = false;
+        if (OV_USER) {
+            try {
+                const el = await scope.waitForSelector(OV_USER, { timeout: 5000 });
+                if (el) { await el.fill(""); await el.type(username, { delay: 15 }); userFilled = true; }
+            } catch {}
+        }
         for (const sel of loginSelectors) {
             if (await fillIfPresent(scope, sel, username)) { userFilled = true; break; }
         }
@@ -130,8 +142,29 @@ function findAuthFrame(page, timeoutMs = 15000) {
             const labelUser = await scope.getByLabel ? scope.getByLabel(/email|user name|username/i).first() : null;
             if (labelUser) { await labelUser.fill(username); userFilled = true; }
         }
-        // Password
+        // Some SSO flows require a Next/Continue before password appears
+        if (OV_NEXT) {
+            try { const btn = await scope.$(OV_NEXT); if (btn) await btn.click(); } catch {}
+        } else {
+            const nextCandidates = [
+                'input[type="submit"][value="Next" i]',
+                'button:has-text("Next")',
+                '#idSIButton9'
+            ];
+            for (const sel of nextCandidates) {
+                const btn = await scope.$(sel);
+                if (btn) { try { await btn.click(); } catch {} break; }
+            }
+        }
+        try { await scope.waitForTimeout(800); } catch {}
+        // Password (env override first)
         let pwFilled = false;
+        if (OV_PASS) {
+            try {
+                const el = await scope.waitForSelector(OV_PASS, { timeout: 5000 });
+                if (el) { await el.fill(""); await el.type(password, { delay: 20 }); pwFilled = true; }
+            } catch {}
+        }
         for (const sel of passwordSelectors) {
             if (await fillIfPresent(scope, sel, password)) { pwFilled = true; break; }
         }
@@ -149,6 +182,9 @@ function findAuthFrame(page, timeoutMs = 15000) {
             'input[type="submit"]',
         ];
         let submitted = false;
+        if (OV_SUBMIT) {
+            try { const el = await scope.$(OV_SUBMIT); if (el) { await el.click(); submitted = true; } } catch {}
+        }
         for (const sel of submitSelectors) {
             const btn = await scope.$(sel);
             if (btn) { await btn.click(); submitted = true; break; }
