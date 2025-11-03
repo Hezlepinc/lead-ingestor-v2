@@ -11,8 +11,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-    envVarGroups:
-      - lead-ingestor-centralfl
       - key: DEALER_REGION
         value: Central FL
       - key: DEALER_ID
@@ -37,6 +35,8 @@ services:
         value: /opt/render/project/.cache/ms-playwright
       - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: "1"
+    envVarGroups:
+      - lead-ingestor-centralfl
     disk:
       name: lead-ingestor-centralfl-disk
       mountPath: /var/data
@@ -54,8 +54,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-    envVarGroups:
-      - lead-ingestor-jax
       - key: DEALER_REGION
         value: Jacksonville FL
       - key: DEALER_ID
@@ -80,6 +78,8 @@ services:
         value: /opt/render/project/.cache/ms-playwright
       - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: "1"
+    envVarGroups:
+      - lead-ingestor-jax
     disk:
       name: lead-ingestor-jax-disk
       mountPath: /var/data
@@ -97,8 +97,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-    envVarGroups:
-      - lead-ingestor-ftmyers
       - key: DEALER_REGION
         value: Ft Myers FL
       - key: DEALER_ID
@@ -123,6 +121,8 @@ services:
         value: /opt/render/project/.cache/ms-playwright
       - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: "1"
+    envVarGroups:
+      - lead-ingestor-ftmyers
     disk:
       name: lead-ingestor-ftmyers-disk
       mountPath: /var/data
@@ -140,8 +140,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-    envVarGroups:
-      - lead-ingestor-austin
       - key: DEALER_REGION
         value: Austin TX
       - key: DEALER_ID
@@ -166,6 +164,8 @@ services:
         value: /opt/render/project/.cache/ms-playwright
       - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: "1"
+    envVarGroups:
+      - lead-ingestor-austin
     disk:
       name: lead-ingestor-austin-disk
       mountPath: /var/data
@@ -183,8 +183,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-    envVarGroups:
-      - lead-ingestor-dallas
       - key: DEALER_REGION
         value: Dallas TX
       - key: DEALER_ID
@@ -209,6 +207,8 @@ services:
         value: /opt/render/project/.cache/ms-playwright
       - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: "1"
+    envVarGroups:
+      - lead-ingestor-dallas
     disk:
       name: lead-ingestor-dallas-disk
       mountPath: /var/data
