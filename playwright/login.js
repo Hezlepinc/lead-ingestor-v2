@@ -38,7 +38,7 @@ function findAuthFrame(page, timeoutMs = 20000) {
 
 (async () => {
     const region = process.env.DEALER_REGION || "Unknown Region";
-    const appUrl = process.env.POWERPLAY_APP_URL || "https://powerplay.generac.com/app/powerplay3/";
+    const appUrl = process.env.POWERPLAY_APP_URL || "https://powerplay.generac.com/app/";
     const cookiePath = process.env.COOKIE_PATH;
     const username = process.env.PP_USERNAME;
     const password = process.env.PP_PASSWORD;

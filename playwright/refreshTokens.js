@@ -95,7 +95,7 @@ async function validateToken(page, apiRoot, token) {
     const region = process.env.DEALER_REGION || "Unknown Region";
     const tokenPath = process.env.TOKEN_PATH;
     const cookiePath = process.env.COOKIE_PATH;
-    const appUrl = process.env.POWERPLAY_APP_URL || "https://powerplay.generac.com/app/powerplay3/";
+    const appUrl = process.env.POWERPLAY_APP_URL || "https://powerplay.generac.com/app/";
     const apiRoot = process.env.POWERPLAY_API_ROOT || "https://powerplay.generac.com/app/powerplay3-server/api";
 
     if (!tokenPath) {

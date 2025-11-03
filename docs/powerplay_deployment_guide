@@ -53,7 +53,7 @@ lead-ingestor-v2/
 ```
 MONGO_URI="mongodb+srv://<user>:<pass>@lead-ingestor.mongodb.net/lead-ingestor"
 POWERPLAY_API_ROOT=https://powerplay.generac.com/app/powerplay3-server/api
-POWERPLAY_APP_URL=https://powerplay.generac.com/app/powerplay3/
+POWERPLAY_APP_URL=https://powerplay.generac.com/app/
 POWERPLAY_LEADPOOL_HUB=https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
 REGIONS="Central FL,Jacksonville FL,Ft Myers FL,Austin TX,Dallas TX"
 AUTO_CLAIM=true

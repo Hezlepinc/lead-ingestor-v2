@@ -20,7 +20,7 @@ services:
       - key: POWERPLAY_LEADPOOL_HUB
         value: https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
       - key: POWERPLAY_APP_URL
-        value: https://powerplay.generac.com/app/powerplay3/
+        value: https://powerplay.generac.com/app/
       - key: TOKEN_PATH
         value: /var/data/tokens/central-fl-token.txt
       - key: COOKIE_PATH
@@ -63,7 +63,7 @@ services:
       - key: POWERPLAY_LEADPOOL_HUB
         value: https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
       - key: POWERPLAY_APP_URL
-        value: https://powerplay.generac.com/app/powerplay3/
+        value: https://powerplay.generac.com/app/
       - key: TOKEN_PATH
         value: /var/data/tokens/jacksonville-fl-token.txt
       - key: COOKIE_PATH
@@ -106,7 +106,7 @@ services:
       - key: POWERPLAY_LEADPOOL_HUB
         value: https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
       - key: POWERPLAY_APP_URL
-        value: https://powerplay.generac.com/app/powerplay3/
+        value: https://powerplay.generac.com/app/
       - key: TOKEN_PATH
         value: /var/data/tokens/ft-myers-fl-token.txt
       - key: COOKIE_PATH
@@ -149,7 +149,7 @@ services:
       - key: POWERPLAY_LEADPOOL_HUB
         value: https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
       - key: POWERPLAY_APP_URL
-        value: https://powerplay.generac.com/app/powerplay3/
+        value: https://powerplay.generac.com/app/
       - key: TOKEN_PATH
         value: /var/data/tokens/austin-tx-token.txt
       - key: COOKIE_PATH
@@ -192,7 +192,7 @@ services:
       - key: POWERPLAY_LEADPOOL_HUB
         value: https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
       - key: POWERPLAY_APP_URL
-        value: https://powerplay.generac.com/app/powerplay3/
+        value: https://powerplay.generac.com/app/
       - key: TOKEN_PATH
         value: /var/data/tokens/dallas-tx-token.txt
       - key: COOKIE_PATH
