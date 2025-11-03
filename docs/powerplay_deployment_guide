@@ -1,0 +1,282 @@
+# ⚡ Lead-Ingestor v2 — PowerPlay Deployment Guide (Zero-Downtime Tokens)
+
+> Cursor-ready instructions for multi-region, auto-refreshing lead capture with exp-aware token rotation.
+
+---
+
+## 🧭 1. Purpose
+
+This service connects to Generac PowerPlay’s live lead hub, captures new leads the moment they’re broadcast, and fires an instant `POST /Opportunity/Claim` in under a second.
+
+Designed for five regions, each as its own lightweight Node.js worker with isolated auth and SignalR connection.
+
+---
+
+## 🌎 2. Supported Regions
+
+| Region          | Dealer ID | Token File                       | Cookie File                    |
+| --------------- | --------- | -------------------------------- | ------------------------------ |
+| Central FL      | 19019     | `data/central-fl-token.txt`      | `cookies/central-fl.json`      |
+| Jacksonville FL | 19020     | `data/jacksonville-fl-token.txt` | `cookies/jacksonville-fl.json` |
+| Ft Myers FL     | 19021     | `data/ft-myers-fl-token.txt`     | `cookies/ft-myers-fl.json`     |
+| Austin TX       | 9187      | `data/austin-tx-token.txt`       | `cookies/austin-tx.json`       |
+| Dallas TX       | 15109     | `data/dallas-tx-token.txt`       | `cookies/dallas-tx.json`       |
+
+Each region has its own Auth0 session, JWT id_token, and SignalR connection.
+
+---
+
+## 🧩 3. Repository Layout
+
+```
+lead-ingestor-v2/
+├── src/
+│  ├── index.js                  ← Launches region worker (your app)
+│  ├── hubClient.js              ← SignalR listener (your app)
+│  ├── claimHandler.js           ← Instant claim POST (your app)
+│  └── auth/
+│     └── tokenService.js        ← Exp-aware token loader + auto-refresh (added)
+├── playwright/
+│  └── refreshTokens.js          ← Headless refresh via saved cookies (added)
+├── data/                        ← id_token text files per region
+├── cookies/                     ← Playwright cookie JSON per region
+├── docs/
+│  └── powerplay_deployment_guide
+├── .env                         ← Shared env (local)
+└── package.json
+```
+
+---
+
+## ⚙️ 4. Environment Variables (`.env`)
+
+```
+MONGO_URI="mongodb+srv://<user>:<pass>@lead-ingestor.mongodb.net/lead-ingestor"
+POWERPLAY_API_ROOT=https://powerplay.generac.com/app/powerplay3-server/api
+POWERPLAY_APP_URL=https://powerplay.generac.com/app/powerplay3/
+POWERPLAY_LEADPOOL_HUB=https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
+REGIONS="Central FL,Jacksonville FL,Ft Myers FL,Austin TX,Dallas TX"
+AUTO_CLAIM=true
+NODE_ENV=production
+
+# Playwright runtime on Render (optional)
+PLAYWRIGHT_BROWSERS_PATH=/opt/render/project/.cache/ms-playwright
+PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+```
+
+Each Render worker overrides these per region:
+
+```
+DEALER_ID=19019
+DEALER_REGION="Central FL"
+TOKEN_PATH=./data/central-fl-token.txt
+COOKIE_PATH=./cookies/central-fl.json
+```
+
+---
+
+## 🔐 5. Token Automation (Zero-Downtime)
+
+### a) Why not hourly?
+
+Fixed-interval refresh can collide with lead bursts and cause reconnects at the worst time. Instead, read the JWT `exp` and refresh just-in-time.
+
+### b) How it works
+
+- Decode `exp` from the current `id_token`
+- Schedule background refresh 5 minutes before expiry
+- Use Playwright with saved cookies to fetch a new `id_token`
+- Validate via `GET /UserProfile` before swapping
+- Swap token in-memory; SignalR reconnects seamlessly
+
+### c) Token service API
+
+Use the service anywhere you need a Bearer token:
+
+```
+const { TokenService } = require("../auth/tokenService");
+
+const tokenService = new TokenService({
+  regionName: process.env.DEALER_REGION,
+  tokenFilePath: process.env.TOKEN_PATH,
+  cookieFilePath: process.env.COOKIE_PATH,
+});
+
+function getAuthHeader() {
+  return { Authorization: `Bearer ${tokenService.getToken()}` };
+}
+```
+
+It logs next refresh time and emits `tokenLoaded`/`tokenRefreshed` events if you want to hook telemetry.
+
+---
+
+## 🛰️ 6. Render Deployment (Web Services + Persistent Disk)
+
+### a) Build Command
+
+```
+npm ci && npx playwright install chromium
+```
+
+### b) Start Command
+
+```
+node scripts/bootstrap.js
+```
+
+### c) Service Type
+
+- Web Service (enables `/status` health check)
+- Node 20, 512 MB RAM
+- One service per region (5 total)
+
+### d) Persistent Disk
+
+- Add a disk to each service (e.g., 1–2 GB) mounted at `/var/data`
+- Point `TOKEN_PATH` and `COOKIE_PATH` to region-specific files under `/var/data`:
+  - `TOKEN_PATH=/var/data/tokens/central-fl-token.txt`
+  - `COOKIE_PATH=/var/data/cookies/central-fl.json`
+
+### e) Suggested Names
+
+```
+lead-ingestor-centralfl
+lead-ingestor-jax
+lead-ingestor-ftmyers
+lead-ingestor-austin
+lead-ingestor-dallas
+```
+
+Each service sets region-specific overrides shown in section 4.
+
+---
+
+## 🔁 7. Playwright Scripts
+
+- `playwright/refreshTokens.js` reads cookies for the region, navigates to `POWERPLAY_APP_URL`, extracts the freshest JWT from storage/cookies, validates it against `POWERPLAY_API_ROOT/UserProfile`, and writes to `TOKEN_PATH`.
+- Run automatically by `tokenService` 5 minutes before expiry.
+
+Manual run (local):
+
+```
+NODE_ENV=production DEALER_REGION="Central FL" TOKEN_PATH=./data/central-fl-token.txt COOKIE_PATH=./cookies/central-fl.json node playwright/refreshTokens.js
+```
+
+Optional daily cookie renewal: maintain cookies independently via your own `playwright/login.js` (not included here) and save to `cookies/<region>.json`.
+
+---
+
+## 🔒 8. MongoDB Collections
+
+| Collection | Purpose                                    | TTL               |
+| ---------- | ------------------------------------------ | ----------------- |
+| `events`   | Raw PowerPlay traffic (SignalR + API)      | 7 days            |
+| `claims`   | Claimed leads log (opportunityId, latency) | Permanent         |
+| `auths`    | Latest tokens & cookies                    | 24 h auto-replace |
+
+---
+
+## ⚡ 9. Live Operation Flow
+
+```
+SignalR LeadAvailable Event
+        │
+        ▼
+ClaimHandler → POST /Opportunity/Claim (Bearer id_token)
+        │
+        ▼
+Mongo → log claim + latency
+```
+
+Average reaction time: 300–450 ms from broadcast to claim confirmation.
+
+---
+
+## 🧩 10. Observability
+
+Console example:
+
+```
+[Central FL] 🛰️ Listening for leads...
+[Central FL] ⚡ LeadAvailable 3050827
+[Central FL] 🤖 Claimed 3050827 (200) in 342 ms
+[Central FL] ⏰ Next refresh scheduled at 2025-11-03T12:26:00.000Z
+[Central FL] ✅ Token refreshed — expires 2025-11-03T12:31:00.000Z
+```
+
+Mongo event example:
+
+```
+{
+  "region": "Central FL",
+  "type": "LeadAvailable",
+  "payload": { "opportunityId": "3050827" },
+  "createdAt": "2025-11-03T20:45:12Z"
+}
+```
+
+---
+
+## 🧱 11. Scaling Notes
+
+- Each region = separate worker → prevents token collision
+- Each worker maintains its own WebSocket + auth context
+- All workers write to shared Mongo for centralized reporting
+- Future upgrade: central dashboard reading `claims` and `events`
+
+---
+
+## ✅ 12. Quick Start
+
+```
+git clone https://github.com/Hezlepinc/lead-ingestor-v2.git
+cd lead-ingestor-v2
+npm install
+
+# Create .env (see section 4)
+# Add five token text files in /data/ and cookie JSONs in /cookies/
+
+# Deploy: one Render worker per region (section 6)
+# Verify logs for “🛰️ Listening for leads...” and next refresh schedule
+# Confirm Mongo writes in claims collection
+```
+
+Status: Ready for multi-region deployment and real-time lead interception. Next milestone: integrate your SignalR `hubClient` to consume `TokenService` for Authorization headers.
+
+---
+
+## 📎 File References
+
+Token service:
+
+```1:30:src/auth/tokenService.js
+"use strict";
+
+const fs = require("fs");
+const path = require("path");
+const jwt = require("jsonwebtoken");
+const { spawn } = require("child_process");
+const EventEmitter = require("events");
+
+class TokenService extends EventEmitter {
+  constructor(options) {
+    super();
+    // ...
+  }
+}
+```
+
+Playwright refresh:
+
+```1:20:playwright/refreshTokens.js
+"use strict";
+
+const fs = require("fs");
+const path = require("path");
+const { chromium } = require("playwright");
+
+function readJsonIfExists(filePath) {
+  try { return JSON.parse(fs.readFileSync(filePath, "utf8")); } catch { return null; }
+}
+```

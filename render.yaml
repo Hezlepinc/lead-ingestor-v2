@@ -1,0 +1,206 @@
+services:
+  - type: web
+    name: lead-ingestor-centralfl
+    env: node
+    plan: starter
+    region: oregon
+    buildCommand: npm ci && npx playwright install chromium
+    startCommand: node scripts/bootstrap.js
+    autoDeploy: true
+    healthCheckPath: /status
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEALER_REGION
+        value: Central FL
+      - key: DEALER_ID
+        value: 19019
+      - key: POWERPLAY_API_ROOT
+        value: https://powerplay.generac.com/app/powerplay3-server/api
+      - key: POWERPLAY_LEADPOOL_HUB
+        value: https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
+      - key: POWERPLAY_APP_URL
+        value: https://powerplay.generac.com/app/powerplay3/
+      - key: TOKEN_PATH
+        value: /var/data/tokens/central-fl-token.txt
+      - key: COOKIE_PATH
+        value: /var/data/cookies/central-fl.json
+      - key: AUTO_CLAIM
+        value: "true"
+      - key: COOKIE_RENEWAL_ENABLED
+        value: "true"
+      - key: COOKIE_RENEWAL_INTERVAL_MIN
+        value: "1440"
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/.cache/ms-playwright
+      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
+        value: "1"
+    disk:
+      name: lead-ingestor-centralfl-disk
+      mountPath: /var/data
+      sizeGB: 2
+
+  - type: web
+    name: lead-ingestor-jax
+    env: node
+    plan: starter
+    region: oregon
+    buildCommand: npm ci && npx playwright install chromium
+    startCommand: node scripts/bootstrap.js
+    autoDeploy: true
+    healthCheckPath: /status
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEALER_REGION
+        value: Jacksonville FL
+      - key: DEALER_ID
+        value: 19020
+      - key: POWERPLAY_API_ROOT
+        value: https://powerplay.generac.com/app/powerplay3-server/api
+      - key: POWERPLAY_LEADPOOL_HUB
+        value: https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
+      - key: POWERPLAY_APP_URL
+        value: https://powerplay.generac.com/app/powerplay3/
+      - key: TOKEN_PATH
+        value: /var/data/tokens/jacksonville-fl-token.txt
+      - key: COOKIE_PATH
+        value: /var/data/cookies/jacksonville-fl.json
+      - key: AUTO_CLAIM
+        value: "true"
+      - key: COOKIE_RENEWAL_ENABLED
+        value: "true"
+      - key: COOKIE_RENEWAL_INTERVAL_MIN
+        value: "1440"
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/.cache/ms-playwright
+      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
+        value: "1"
+    disk:
+      name: lead-ingestor-jax-disk
+      mountPath: /var/data
+      sizeGB: 2
+
+  - type: web
+    name: lead-ingestor-ftmyers
+    env: node
+    plan: starter
+    region: oregon
+    buildCommand: npm ci && npx playwright install chromium
+    startCommand: node scripts/bootstrap.js
+    autoDeploy: true
+    healthCheckPath: /status
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEALER_REGION
+        value: Ft Myers FL
+      - key: DEALER_ID
+        value: 19021
+      - key: POWERPLAY_API_ROOT
+        value: https://powerplay.generac.com/app/powerplay3-server/api
+      - key: POWERPLAY_LEADPOOL_HUB
+        value: https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
+      - key: POWERPLAY_APP_URL
+        value: https://powerplay.generac.com/app/powerplay3/
+      - key: TOKEN_PATH
+        value: /var/data/tokens/ft-myers-fl-token.txt
+      - key: COOKIE_PATH
+        value: /var/data/cookies/ft-myers-fl.json
+      - key: AUTO_CLAIM
+        value: "true"
+      - key: COOKIE_RENEWAL_ENABLED
+        value: "true"
+      - key: COOKIE_RENEWAL_INTERVAL_MIN
+        value: "1440"
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/.cache/ms-playwright
+      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
+        value: "1"
+    disk:
+      name: lead-ingestor-ftmyers-disk
+      mountPath: /var/data
+      sizeGB: 2
+
+  - type: web
+    name: lead-ingestor-austin
+    env: node
+    plan: starter
+    region: oregon
+    buildCommand: npm ci && npx playwright install chromium
+    startCommand: node scripts/bootstrap.js
+    autoDeploy: true
+    healthCheckPath: /status
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEALER_REGION
+        value: Austin TX
+      - key: DEALER_ID
+        value: 9187
+      - key: POWERPLAY_API_ROOT
+        value: https://powerplay.generac.com/app/powerplay3-server/api
+      - key: POWERPLAY_LEADPOOL_HUB
+        value: https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
+      - key: POWERPLAY_APP_URL
+        value: https://powerplay.generac.com/app/powerplay3/
+      - key: TOKEN_PATH
+        value: /var/data/tokens/austin-tx-token.txt
+      - key: COOKIE_PATH
+        value: /var/data/cookies/austin-tx.json
+      - key: AUTO_CLAIM
+        value: "true"
+      - key: COOKIE_RENEWAL_ENABLED
+        value: "true"
+      - key: COOKIE_RENEWAL_INTERVAL_MIN
+        value: "1440"
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/.cache/ms-playwright
+      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
+        value: "1"
+    disk:
+      name: lead-ingestor-austin-disk
+      mountPath: /var/data
+      sizeGB: 2
+
+  - type: web
+    name: lead-ingestor-dallas
+    env: node
+    plan: starter
+    region: oregon
+    buildCommand: npm ci && npx playwright install chromium
+    startCommand: node scripts/bootstrap.js
+    autoDeploy: true
+    healthCheckPath: /status
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEALER_REGION
+        value: Dallas TX
+      - key: DEALER_ID
+        value: 15109
+      - key: POWERPLAY_API_ROOT
+        value: https://powerplay.generac.com/app/powerplay3-server/api
+      - key: POWERPLAY_LEADPOOL_HUB
+        value: https://powerplay.generac.com/app/lead-pool-service/hubs/leadpool
+      - key: POWERPLAY_APP_URL
+        value: https://powerplay.generac.com/app/powerplay3/
+      - key: TOKEN_PATH
+        value: /var/data/tokens/dallas-tx-token.txt
+      - key: COOKIE_PATH
+        value: /var/data/cookies/dallas-tx.json
+      - key: AUTO_CLAIM
+        value: "true"
+      - key: COOKIE_RENEWAL_ENABLED
+        value: "true"
+      - key: COOKIE_RENEWAL_INTERVAL_MIN
+        value: "1440"
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/.cache/ms-playwright
+      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
+        value: "1"
+    disk:
+      name: lead-ingestor-dallas-disk
+      mountPath: /var/data
+      sizeGB: 2
+

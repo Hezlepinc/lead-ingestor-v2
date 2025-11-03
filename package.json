@@ -1,0 +1,25 @@
+{
+  "name": "lead-ingestor-v2",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Multi-region PowerPlay lead ingestor with zero-downtime token refresh",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "postinstall": "npx playwright install chromium",
+    "refresh:token": "node playwright/refreshTokens.js",
+    "login": "node playwright/login.js",
+    "start": "node scripts/bootstrap.js",
+    "smoke": "node scripts/smoke.js"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "^8.0.6",
+    "jsonwebtoken": "^9.0.2",
+    "playwright": "^1.48.0",
+    "ws": "^8.18.0"
+  }
+}
+
+
