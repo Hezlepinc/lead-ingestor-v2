@@ -25,53 +25,70 @@ function looksLikeJwt(str) {
 }
 
 async function extractBestJwt(page) {
-    const results = await page.evaluate(() => {
+    // Capture oauth/token network responses (Auth0)
+    let captured = null;
+    const onResponse = async (response) => {
+        try {
+            const url = response.url();
+            if (!/oauth\/token|authorize/i.test(url)) return;
+            const ct = (response.headers()["content-type"] || "").toLowerCase();
+            if (!ct.includes("application/json")) return;
+            const body = await response.json().catch(() => null);
+            if (body && typeof body === "object") {
+                const maybe = body.id_token || body.idToken || body.access_token || body.accessToken;
+                if (typeof maybe === "string" && looksLikeJwt(maybe)) captured = maybe;
+            }
+        } catch {}
+    };
+    page.on("response", onResponse);
+
+    // Scan storages, cookies, and inline scripts
+    const texts = await page.evaluate(() => {
         const out = [];
-        const scanStore = (store) => {
-            for (let i = 0; i < store.length; i++) {
-                const key = store.key(i);
-                const val = store.getItem(key);
-                out.push({ source: "storage", key, val });
-                // Try to parse JSON-ish values
-                try {
-                    const obj = JSON.parse(val);
-                    if (obj && typeof obj === "object") {
-                        for (const k of Object.keys(obj)) {
-                            const v = obj[k];
-                            if (typeof v === "string") {
-                                out.push({ source: "json", key: `${key}.${k}`, val: v });
-                            }
-                        }
-                    }
-                } catch {}
+        const push = (v) => { if (typeof v === "string") out.push(v); };
+        const scanObj = (o) => {
+            if (!o || typeof o !== "object") return;
+            for (const k of Object.keys(o)) {
+                const v = o[k];
+                if (typeof v === "string") out.push(v); else if (v && typeof v === "object") try { scanObj(v); } catch {}
             }
         };
-        scanStore(window.localStorage);
-        scanStore(window.sessionStorage);
-        // Also push cookies string
-        out.push({ source: "cookie", key: "document.cookie", val: document.cookie || "" });
+        const scanStore = (s) => {
+            for (let i = 0; i < s.length; i++) {
+                const key = s.key(i);
+                const v = s.getItem(key);
+                push(v);
+                try { scanObj(JSON.parse(v)); } catch {}
+            }
+        };
+        try { scanStore(localStorage); } catch {}
+        try { scanStore(sessionStorage); } catch {}
+        try { out.push(document.cookie || ""); } catch {}
+        try { document.querySelectorAll("script").forEach(s => s.textContent && out.push(s.textContent)); } catch {}
         return out;
     });
 
     const candidates = [];
-
-    for (const item of results) {
-        if (!item.val) continue;
-        // Cookie may contain multiple k=v; scan tokens in it
-        const possible = String(item.val).split(/[;\s]+/);
-        for (const s of possible) {
-            const maybe = s.includes("=") ? s.split("=").slice(1).join("=") : s;
-            const trimmed = maybe.trim();
-            if (looksLikeJwt(trimmed)) {
+    const pluck = (str) => {
+        const parts = String(str || "").split(/[;\s"'`,]+/);
+        for (const p of parts) {
+            const t = p.trim();
+            if (looksLikeJwt(t)) {
                 try {
-                    const payload = JSON.parse(Buffer.from(trimmed.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
-                    candidates.push({ token: trimmed, exp: payload.exp });
+                    const payload = JSON.parse(Buffer.from(t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
+                    candidates.push({ token: t, exp: payload.exp || 0 });
                 } catch {}
             }
         }
-    }
+    };
+    texts.forEach(pluck);
 
-    if (candidates.length === 0) return null;
+    // Small wait to allow network capture
+    if (!candidates.length && !captured) {
+        for (let i = 0; i < 10 && !captured; i++) await new Promise(r => setTimeout(r, 300));
+        if (captured) return captured;
+    }
+    if (!candidates.length) return null;
     candidates.sort((a, b) => b.exp - a.exp);
     return candidates[0].token;
 }
